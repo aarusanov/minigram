@@ -1,0 +1,9 @@
+# 🆕 Minigram
+
+## ⚡ Getting Started
+
+## 🔧 Building and Running
+
+### 🔨 Build the Project
+
+### ▶ Running and Settings
