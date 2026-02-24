@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Minigram.Auth/Minigram.Auth.csproj" />
+  <Project Path="Minigram.Models/Minigram.Models.csproj" />
+</Solution>
