@@ -1,4 +1,4 @@
 <Solution>
   <Project Path="Minigram.Auth/Minigram.Auth.csproj" />
-  <Project Path="Minigram.Models/Minigram.Models.csproj" />
+  <Project Path="Minigram.Core/Minigram.Core.csproj" />
 </Solution>

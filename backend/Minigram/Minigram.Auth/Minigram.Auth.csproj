@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Minigram.Models\Minigram.Models.csproj" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+    <ProjectReference Include="..\Minigram.Core\Minigram.Core.csproj" />
   </ItemGroup>
 
 </Project>
