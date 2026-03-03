@@ -1,5 +1,11 @@
 namespace Minigram.Auth
 {
+    using Microsoft.EntityFrameworkCore;
+    using Minigram.Auth.Services;
+    using Minigram.Core.ApplicationContext;
+    using Minigram.Core.Models;
+    using Minigram.Core.Repositories;
+
     public class Program
     {
         public static void Main(string[] args)
@@ -7,6 +13,13 @@ namespace Minigram.Auth
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllers();
+
+            builder.Services.AddDbContext<ApplicationContext>(options => 
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddScoped<IRepository<User>, BaseRepository<User>>();
+
+            builder.Services.AddScoped<UserService>();
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
