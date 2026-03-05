@@ -5,17 +5,29 @@ namespace Minigram.Auth.Extensions
 
     public static class UserExtensions
     {
-        public static ReadUserDto ToDto(this User user)
+        public static ReadProfileDto ToProfileDto(this User user)
+        {
+            ArgumentNullException.ThrowIfNull(user);
+
+            return new ReadProfileDto
+            {
+                UserId = user.Id,
+                Name = user.Profile.Name,
+                PhotoUrl = user.Profile.PhotoUrl,
+            };
+        }
+
+        public static ReadUserDto ToUserDto(this User user)
         {
             ArgumentNullException.ThrowIfNull(user);
 
             return new ReadUserDto
             {
+                UserId = user.Id,
                 Email = user.Email,
-                Phone = user.Phone,
                 IsEmailVerified = user.IsEmailVerified,
-                IsPhoneVerified = user.IsPhoneVerified,
-                Profiles = user.Profiles.Select(p => p.ToDto()).ToList()
+                Name = user.Profile.Name,
+                PhotoUrl = user.Profile.PhotoUrl,
             };
         }
     }

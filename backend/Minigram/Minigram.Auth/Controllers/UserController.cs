@@ -1,8 +1,10 @@
 namespace Minigram.Auth.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.JsonPatch;
     using Minigram.Auth.Dto;
     using Minigram.Auth.Dto.User;
+    using Minigram.Auth.Extensions;
     using Minigram.Auth.Services;
     using Minigram.Core.Models;
 
@@ -10,62 +12,92 @@ namespace Minigram.Auth.Controllers
     [Route("[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly UserService _userService;
+        private readonly CurrentUserService _currentUserService;
 
-        public UserController(UserService userService)
+        private readonly RelationService _relationService;
+
+        private readonly ProfileService _profileService;
+
+        private Guid UserId =>
+            _currentUserService.UserGuid ?? throw new UnauthorizedAccessException();
+
+        public UserController(
+            CurrentUserService currentUserService,
+            RelationService relationService,
+            ProfileService profileService)
         {
-            _userService = userService;
+            _currentUserService = currentUserService;
+            _relationService = relationService;
+            _profileService = profileService;
         }
 
         [HttpGet]
-        public async Task<PagedResponse<ReadUserDto>> GetAll([FromQuery] QueryParams queryParams)
+        public async Task<PagedResponse<ReadProfileDto>> GetAll([FromQuery] QueryParams queryParams)
         {
-            ArgumentNullException.ThrowIfNull(queryParams);
+            int count = await _profileService.Count();
+            List<ReadProfileDto> data = await _profileService.GetAll(queryParams);
 
-            int count = await _userService.Count();
-            List<ReadUserDto> data = await _userService.GetAll(queryParams);
-
-            return new PagedResponse<ReadUserDto>
+            return new PagedResponse<ReadProfileDto>
             {
                 Count = count,
                 Data = data,
             };
         }
 
-        [HttpGet("{id}")]
-        public async Task<ReadUserDto> Get([FromRoute] Guid id)
+        [HttpGet($"{{{nameof(userId)}}}")]
+        public async Task<ReadProfileDto> Get([FromRoute] Guid userId)
         {
-            return await _userService.Get(id);
+            return await _profileService.Get(userId);
         }
 
-        [HttpGet("count")]
-        public async Task<int> Count()
+        [HttpGet(nameof(Relation))]
+        public async Task<PagedResponse<ReadRelationDto>> GetRelationsByStatus(
+            [FromQuery] tRelationshipStatus status,
+            [FromQuery] QueryParams queryParams)
         {
-            return await _userService.Count();
+            int count = await _relationService.CountByStatus(UserId, status);
+            List<ReadRelationDto> data = await _relationService.GetAllByStatus(UserId, status, queryParams);
+
+            return new PagedResponse<ReadRelationDto>
+            {
+                Count = count,
+                Data = data,
+            };
         }
 
-        [HttpPost]
-        public ActionResult Create([FromBody] User user)
+        [HttpGet($"{nameof(Relation)}/{{{nameof(recieverId)}}}")]
+        public async Task<ReadRelationDto> GetRelation([FromRoute] Guid recieverId)
         {
-            return CreatedAtAction(nameof(Get), user.Id);
+            return await _relationService.Get(UserId, recieverId);
+        }
+
+        [HttpPost($"{nameof(Relation)}/{{{nameof(recieverId)}}}")]
+        public async Task<ActionResult> CreateOrUpdateRelation(
+            [FromRoute] Guid recieverId,
+            [FromQuery] tRelationshipStatus status)
+        {
+            Relation relation = await _relationService.CreateOrUpdate(UserId, recieverId, status);
+            return CreatedAtAction(nameof(GetRelation), relation.ToDto());
         }
 
         [HttpPut]
-        public ActionResult Update([FromBody] User user)
+        public async Task<ActionResult> Update([FromBody] UpdateProfileDto dto)
         {
-            return CreatedAtAction(nameof(Get), user.Id);
+            User user = await _profileService.Update(UserId, dto);
+            return CreatedAtAction(nameof(GetRelation), user.ToProfileDto());
         }
 
-        [HttpPatch("{id}")]
-        public ActionResult Patch([FromRoute] Guid id, [FromBody] User user)
+        [HttpPatch]
+        public async Task<ActionResult> Patch([FromBody] JsonPatchDocument<UpdateProfileDto> patch)
         {
-            return CreatedAtAction(nameof(Get), id);
+            User user = await _profileService.Patch(UserId, patch);
+            return CreatedAtAction(nameof(GetRelation), user.ToProfileDto());
         }
 
-        [HttpDelete("{id}")]
-        public async Task Delete([FromRoute] Guid id)
+        [HttpDelete($"{nameof(Relation)}/{{{nameof(recieverId)}}}")]
+        public async Task DeleteRelation([FromRoute] Guid recieverId)
         {
-            await _userService.Delete(id);
+            await _relationService.Delete(UserId, recieverId);
         }
     }
 }
