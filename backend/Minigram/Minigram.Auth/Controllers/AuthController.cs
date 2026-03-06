@@ -1,17 +1,46 @@
 namespace Minigram.Auth.Controllers
 {
     using Microsoft.AspNetCore.Mvc;
-    using Minigram.Auth.Services;
+    using Minigram.Auth.DTO;
 
     [ApiController]
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly UserService _userService;
-
-        public AuthController(UserService userService)
+        [HttpPost(nameof(Login))]
+        public async Task<JwtResponse> Login(LoginRequestDto dto)
         {
-            _userService = userService;
+            return new JwtResponse
+            {
+                AccessToken = string.Empty,
+                RefreshToken = "12345",
+            };
+        }
+
+        [HttpPost(nameof(Register))]
+        public async Task<JwtResponse> Register(RegisterRequestDto dto)
+        {
+            return new JwtResponse
+            {
+                AccessToken = string.Empty,
+                RefreshToken = "12345",
+            };
+        }
+
+        [HttpPost(nameof(Logout))]
+        public async Task<ActionResult> Logout()
+        {
+            return Ok();
+        }
+
+        [HttpPost(nameof(Refresh))]
+        public async Task<JwtResponse> Refresh(RefreshRequest dto)
+        {
+            return new JwtResponse
+            {
+                AccessToken = string.Empty,
+                RefreshToken = "12345",
+            };
         }
     }
 }

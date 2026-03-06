@@ -1,0 +1,20 @@
+namespace Minigram.Auth.DTO
+{
+    using System.ComponentModel.DataAnnotations;
+
+    public class RegisterRequestDto
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        [Url]
+        public string? PhotoUrl { get; set; }
+
+        [Required]
+        public string Password { get; set; } = string.Empty;
+    }
+}

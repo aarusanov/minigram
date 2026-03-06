@@ -1,6 +1,6 @@
-namespace Minigram.Core.Models
+namespace Minigram.Profile.Dto
 {
-    public class Profile : BaseModel
+    public class ProfileResponseDto
     {
         public Guid UserId { get; set; }
 

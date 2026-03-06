@@ -1,10 +1,12 @@
-namespace Minigram.Auth
+namespace Minigram.Profile
 {
     using Microsoft.EntityFrameworkCore;
     using System.Text.Json.Serialization;
-    using Minigram.Core.Context;
+    using Minigram.Profile.Models;
+    using Minigram.Profile.Services;
     using Minigram.Core.Repositories;
-    using Minigram.Auth.Models;
+    using Minigram.Core.Context;
+    using System.Text.Json;
 
     public class Program
     {
@@ -19,11 +21,19 @@ namespace Minigram.Auth
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
+            builder.Services.Configure<RouteOptions>(options =>
+                options.LowercaseUrls = true);
+
             builder.Services.AddDbContext<BaseDbContext, ApplicationContext>(options => 
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            
+            builder.Services.AddSingleton<CurrentUserService>();
 
-            builder.Services.AddScoped<IRepository<User>, BaseRepository<User>>();
-            builder.Services.AddScoped<IRepository<RefreshSession>, BaseRepository<RefreshSession>>();
+            builder.Services.AddScoped<IRepository<Profile>, BaseRepository<Profile>>();
+            builder.Services.AddScoped<IRepository<Relation>, BaseRepository<Relation>>();
+
+            builder.Services.AddScoped<ProfileService>();
+            builder.Services.AddScoped<RelationService>();
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddEndpointsApiExplorer();

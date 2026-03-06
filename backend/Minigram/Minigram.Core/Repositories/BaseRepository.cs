@@ -1,15 +1,15 @@
 namespace Minigram.Core.Repositories
 {
-    using Minigram.Core.Models;
-    using Minigram.Core.ApplicationContext;
     using Microsoft.EntityFrameworkCore;
+    using Minigram.Core.Context;
+    using Minigram.Core.Models;
 
     public class BaseRepository<TEntity> : IRepository<TEntity>
         where TEntity : BaseModel
     {
-        private readonly ApplicationContext _context;
+        private readonly BaseDbContext _context;
 
-        public BaseRepository(ApplicationContext context)
+        public BaseRepository(BaseDbContext context)
         {
             _context = context;
         }

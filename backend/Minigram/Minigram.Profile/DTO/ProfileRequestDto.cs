@@ -1,8 +1,8 @@
-namespace Minigram.Auth.Dto.User
+namespace Minigram.Profile.Dto
 {
     using System.ComponentModel.DataAnnotations;
 
-    public class UpdateProfileDto
+    public class ProfileRequestDto
     {
         [Required]
         public string Name { get; set; } = string.Empty;

@@ -1,4 +1,4 @@
-namespace Minigram.Auth.Services
+namespace Minigram.Profile.Services
 {
     using System.Security.Claims;
 

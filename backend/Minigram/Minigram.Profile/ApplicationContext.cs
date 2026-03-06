@@ -1,12 +1,11 @@
-namespace Minigram.Core.ApplicationContext
+namespace Minigram.Profile
 {
     using Microsoft.EntityFrameworkCore;
-    using Minigram.Core.Models;
+    using Minigram.Core.Context;
+    using Minigram.Profile.Models;
 
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : BaseDbContext
     {
-        public DbSet<User> Users { get; set; }
-
         public DbSet<Profile> Profiles { get; set; }
 
         public DbSet<Relation> Relationships { get; set; }
@@ -22,10 +21,6 @@ namespace Minigram.Core.ApplicationContext
             
             modelBuilder.Entity<Relation>()
                 .Navigation(r => r.Receiver)
-                .AutoInclude();
-            
-            modelBuilder.Entity<User>()
-                .Navigation(u => u.Profile)
                 .AutoInclude();
         }
     }

@@ -1,7 +1,9 @@
-namespace Minigram.Auth.Dto.User
+namespace Minigram.Profile.Models
 {
-    public class ReadProfileDto
-    {
+    using Minigram.Core.Models;
+
+    public class Profile : BaseModel
+    {   
         public Guid UserId { get; set; }
 
         public string Name { get; set; } = string.Empty;

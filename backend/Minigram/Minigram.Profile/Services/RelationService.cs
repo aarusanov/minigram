@@ -1,12 +1,12 @@
-namespace Minigram.Auth.Services
+namespace Minigram.Profile.Services
 {
     using Microsoft.EntityFrameworkCore;
-    using Minigram.Auth.Dto;
-    using Minigram.Auth.Dto.User;
-    using Minigram.Auth.Extensions;
+    using Minigram.Core.Dto;
     using Minigram.Core.Exceptions;
-    using Minigram.Core.Models;
     using Minigram.Core.Repositories;
+    using Minigram.Profile.Dto;
+    using Minigram.Profile.Models;
+    using Minigram.Profile.Extensions;
 
     public class RelationService
     {
@@ -19,7 +19,7 @@ namespace Minigram.Auth.Services
             _relationRepository = relationRepository;
         }
 
-        public async Task<List<ReadRelationDto>> GetAllByStatus(
+        public async Task<List<RelationResponseDto>> GetAllByStatus(
             Guid senderId,
             tRelationshipStatus status,
             QueryParams queryParams)
@@ -28,7 +28,7 @@ namespace Minigram.Auth.Services
 
             if (senderId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}.", nameof(senderId));
+                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}", nameof(senderId));
             }
 
             IQueryable<Relation> relations = Relations;
@@ -51,7 +51,7 @@ namespace Minigram.Auth.Services
         {
             if (senderId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}.", nameof(senderId));
+                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}", nameof(senderId));
             }
 
             return await Relations
@@ -59,19 +59,19 @@ namespace Minigram.Auth.Services
                 .CountAsync();
         }
 
-        public async Task<ReadRelationDto> Get(Guid senderId, Guid recieverId)
+        public async Task<RelationResponseDto> Get(Guid senderId, Guid recieverId)
         {
             if (senderId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}.", nameof(senderId));
+                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}", nameof(senderId));
             }
 
             if (recieverId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(recieverId)} cannot be {recieverId}.", nameof(recieverId));
+                throw new ArgumentException($"{nameof(recieverId)} cannot be {recieverId}", nameof(recieverId));
             }
 
-            ReadRelationDto? relation = await Relations
+            RelationResponseDto? relation = await Relations
                 .Where(r => r.SenderId == senderId && r.ReceiverId == recieverId)
                 .Select(r => r.ToDto())
                 .FirstOrDefaultAsync();
@@ -88,12 +88,12 @@ namespace Minigram.Auth.Services
         {
             if (senderId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}.", nameof(senderId));
+                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}", nameof(senderId));
             }
 
             if (recieverId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(recieverId)} cannot be {recieverId}.", nameof(recieverId));
+                throw new ArgumentException($"{nameof(recieverId)} cannot be {recieverId}", nameof(recieverId));
             }
 
             Relation? relation = await Relations.FirstOrDefaultAsync(
@@ -121,12 +121,12 @@ namespace Minigram.Auth.Services
         {
             if (senderId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}.", nameof(senderId));
+                throw new ArgumentException($"{nameof(senderId)} cannot be {senderId}", nameof(senderId));
             }
 
             if (recieverId == Guid.Empty)
             {
-                throw new ArgumentException($"{nameof(recieverId)} cannot be {recieverId}.", nameof(recieverId));
+                throw new ArgumentException($"{nameof(recieverId)} cannot be {recieverId}", nameof(recieverId));
             }
 
             Relation? relation = await Relations.FirstOrDefaultAsync(

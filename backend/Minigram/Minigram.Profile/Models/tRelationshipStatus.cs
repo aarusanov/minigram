@@ -1,4 +1,4 @@
-namespace Minigram.Core.Models
+namespace Minigram.Profile.Models
 {
     public enum tRelationshipStatus
     {

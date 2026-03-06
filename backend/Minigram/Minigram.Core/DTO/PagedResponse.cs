@@ -1,4 +1,4 @@
-namespace Minigram.Auth.Dto
+namespace Minigram.Core.Dto
 {
     public class PagedResponse<TDto>
     {
