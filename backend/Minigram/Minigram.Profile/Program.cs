@@ -17,7 +17,6 @@ namespace Minigram.Profile
     using Minigram.Profile.Options;
     using Minigram.Profile.Services;
 
-
     public class Program
     {
         public static void Main(string[] args)
