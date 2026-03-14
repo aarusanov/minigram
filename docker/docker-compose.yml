@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  postgres-auth:
+    image: postgres:18.3
+    container_name: minigram-postgres-auth
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    ports:
+      - "${AUTH_DB_PORT}:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql
+    networks:
+      - minigram
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AUTH_DB_USER} -d ${AUTH_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  postgres-profile:
+    image: postgres:18.3
+    container_name: minigram-postgres-profile
+    environment:
+      POSTGRES_DB: ${PROFILE_DB_NAME}
+      POSTGRES_USER: ${PROFILE_DB_USER}
+      POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD}
+    ports:
+      - "${PROFILE_DB_PORT}:5432"
+    volumes:
+      - postgres_profile_data:/var/lib/postgresql
+    networks:
+      - minigram
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PROFILE_DB_USER} -d ${PROFILE_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  liquibase-auth:
+    image: liquibase/liquibase:5.0.1
+    container_name: minigram-liquibase-auth
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres-auth:5432/${AUTH_DB_NAME}
+      LIQUIBASE_COMMAND_USERNAME: ${AUTH_DB_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${AUTH_DB_PASSWORD}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-auth/changelog-auth.xml
+      LIQUIBASE_SEARCH_PATH: /liquibase
+      LIQUIBASE_HEADLESS: true
+      LIQUIBASE_CLASSPATH: /liquibase/lib
+    volumes:
+      - ../backend/sql/changelog-auth.xml:/liquibase/changelog-auth/changelog-auth.xml
+      - ../backend/sql/migrate/auth:/liquibase/changelog-auth/migrate/auth
+      - ./drivers:/liquibase/lib
+    networks:
+      - minigram
+    command:
+      - --driver=org.postgresql.Driver
+      - update
+    restart: "no"
+
+  liquibase-profile:
+    image: liquibase/liquibase:5.0.1
+    container_name: minigram-liquibase-profile
+    depends_on:
+      postgres-profile:
+        condition: service_healthy
+    environment:
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres-profile:5432/${PROFILE_DB_NAME}
+      LIQUIBASE_COMMAND_USERNAME: ${PROFILE_DB_USER}
+      LIQUIBASE_COMMAND_PASSWORD: ${PROFILE_DB_PASSWORD}
+      LIQUIBASE_COMMAND_CHANGELOG_FILE: /changelog-profile/changelog-profile.xml
+      LIQUIBASE_SEARCH_PATH: /liquibase
+      LIQUIBASE_HEADLESS: true
+      LIQUIBASE_CLASSPATH: /liquibase/lib
+    volumes:
+      - ../backend/sql/changelog-profile.xml:/liquibase/changelog-profile/changelog-profile.xml
+      - ../backend/sql/migrate/profile:/liquibase/changelog-profile/migrate/profile
+      - ./drivers:/liquibase/lib
+    networks:
+      - minigram
+    command:
+      - --driver=org.postgresql.Driver
+      - update
+    restart: "no"
+
+volumes:
+  postgres_auth_data:
+  postgres_profile_data:
+
+networks:
+  minigram:

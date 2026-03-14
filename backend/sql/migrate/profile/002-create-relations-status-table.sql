@@ -1,0 +1,1 @@
+CREATE TYPE tRelationshipStatus AS ENUM ('Pending', 'Accepted', 'Rejected', 'Blocked');
