@@ -1,12 +1,12 @@
 namespace Minigram.Profile
 {
-    using Microsoft.EntityFrameworkCore;
     using System.Text.Json.Serialization;
+    using Microsoft.EntityFrameworkCore;
+    using Minigram.Core.Context;
+    using Minigram.Core.Middleware;
+    using Minigram.Core.Repositories;
     using Minigram.Profile.Models;
     using Minigram.Profile.Services;
-    using Minigram.Core.Repositories;
-    using Minigram.Core.Context;
-    using System.Text.Json;
 
     public class Program
     {
@@ -50,6 +50,9 @@ namespace Minigram.Profile
                     options.RoutePrefix = string.Empty;
                 });
             }
+
+            app.UseExceptionHandling();
+            app.UseRequestLogging();
 
             app.UseHttpsRedirection();
             app.UseAuthorization();
