@@ -4,14 +4,17 @@ namespace Minigram.Profile
     using System.Text.Json.Serialization;
     using System.ComponentModel.DataAnnotations;
     using Microsoft.OpenApi;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.IdentityModel.Tokens;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Minigram.Core.Context;
+    using Minigram.Core.Extensions;
+    using Minigram.Core.Conventions;
+    using Minigram.Core.Repositories;
     using Minigram.Profile.Models;
     using Minigram.Profile.Options;
     using Minigram.Profile.Services;
-    using Minigram.Core.Context;
-    using Minigram.Core.Repositories;
 
 
     public class Program
@@ -36,12 +39,19 @@ namespace Minigram.Profile
                     };
                 });
 
-            builder.Services.AddControllers()
+            builder.Services
+                .AddControllers(options =>
+                {
+                    options.Conventions.Add(new ApiVersionRouteConvention());
+                })
                 .AddNewtonsoftJson()
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
+
+            builder.Services.AddApiVersioning(new ApiVersion(1, 0));
+            builder.Services.AddVersionedApiExplorer();
 
             builder.Services.Configure<RouteOptions>(options =>
                 options.LowercaseUrls = true);

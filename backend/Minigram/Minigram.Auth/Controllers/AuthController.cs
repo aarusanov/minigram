@@ -6,6 +6,7 @@ namespace Minigram.Auth.Controllers
     using Minigram.Auth.Models;
     using Minigram.Auth.Services;
 
+    [ApiVersion("1.0")]
     [ApiController]
     [Route("[controller]")]
     public class AuthController : ControllerBase
