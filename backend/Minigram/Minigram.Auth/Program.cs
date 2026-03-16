@@ -1,10 +1,14 @@
 namespace Minigram.Auth
 {
-    using Microsoft.EntityFrameworkCore;
     using System.Text.Json.Serialization;
+    using Microsoft.OpenApi;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
     using Minigram.Core.Context;
     using Minigram.Core.Repositories;
     using Minigram.Auth.Models;
+    using Minigram.Auth.Options;
+    using Minigram.Auth.Services;
 
     public class Program
     {
@@ -19,15 +23,32 @@ namespace Minigram.Auth
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                 });
 
+            builder.Services.AddOptions<JwtOptions>()
+                .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
             builder.Services.AddDbContext<BaseDbContext, ApplicationContext>(options => 
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddSingleton<IPasswordHasher<User>, PasswordHasher<User>>();
 
             builder.Services.AddScoped<IRepository<User>, BaseRepository<User>>();
             builder.Services.AddScoped<IRepository<RefreshSession>, BaseRepository<RefreshSession>>();
 
+            builder.Services.AddScoped<TokenService>();
+            builder.Services.AddScoped<UserService>();
+
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo 
+                {
+                    Title = "Minigram.Auth API",
+                    Version = "v1"
+                });
+            });
 
             var app = builder.Build();
 
@@ -41,7 +62,6 @@ namespace Minigram.Auth
                 });
             }
 
-            app.UseHttpsRedirection();
             app.UseAuthorization();
 
             app.MapControllers();
