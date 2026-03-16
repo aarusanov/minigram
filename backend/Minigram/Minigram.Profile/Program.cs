@@ -1,20 +1,43 @@
 namespace Minigram.Profile
 {
+    using System.Text;
     using System.Text.Json.Serialization;
+    using System.ComponentModel.DataAnnotations;
+    using Microsoft.OpenApi;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.IdentityModel.Tokens;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Minigram.Core.Context;
     using Minigram.Core.Extensions;
     using Minigram.Core.Conventions;
     using Minigram.Core.Repositories;
     using Minigram.Profile.Models;
+    using Minigram.Profile.Options;
     using Minigram.Profile.Services;
+
 
     public class Program
     {
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            JwtOptions? jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
+            ArgumentNullException.ThrowIfNull(jwtOptions);
+
+            Validator.ValidateObject(jwtOptions, new ValidationContext(jwtOptions), true);
+
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = jwtOptions.Issuer,
+                        ValidAudience = jwtOptions.Audience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret))
+                    };
+                });
 
             builder.Services
                 .AddControllers(options =>
@@ -46,7 +69,27 @@ namespace Minigram.Profile
 
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("v1", new OpenApiInfo 
+                {
+                    Title = "Minigram.Profile API",
+                    Version = "v1"
+                });
+
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    BearerFormat = "JWT",
+                    Scheme = "Bearer",
+                });
+
+                options.AddSecurityRequirement(document =>
+                    new() { [new OpenApiSecuritySchemeReference("Bearer", document)] = [] });
+            });
 
             var app = builder.Build();
 
@@ -60,10 +103,10 @@ namespace Minigram.Profile
                 });
             }
 
-            app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapControllers();
+            app.MapControllers().RequireAuthorization();
             app.Run();
         }
     }
